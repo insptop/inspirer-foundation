@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{service::Service, Error, Result};
+use crate::{service::Service, Result};
 use config::{Config as LocalRepository, Source, Value};
 use serde::Deserialize;
 use tokio::sync::RwLock;
