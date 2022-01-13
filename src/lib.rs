@@ -5,6 +5,9 @@ pub mod error;
 pub mod service;
 pub mod component;
 
+#[cfg(feature = "enable-axum")]
+pub mod axum;
+
 pub use error::*;
 
 #[cfg(test)]

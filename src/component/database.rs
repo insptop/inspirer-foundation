@@ -17,8 +17,6 @@ pub struct DatabaseComponentConstructor;
 #[async_trait]
 impl ComponentConstructor for DatabaseComponentConstructor {
     async fn constructor(&self, service: Service) -> Result<()> {
-        log::debug!("Component <DatabaseConnection> creating.");
-
         let database_url = match service.try_get_component::<Config>().await {
             Some(config) => config
                 .get::<Option<String>>("database.connection_url")

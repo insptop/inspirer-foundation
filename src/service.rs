@@ -42,6 +42,7 @@ impl Service {
         let mut guard = self.inner.components.write().await;
 
         guard.insert(component);
+        log::info!("Registered component <{}>", std::any::type_name::<T>());
     }
 }
 
