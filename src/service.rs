@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use crate::Error;
+
+#[cfg(feature = "enable-axum")]
 use axum::extract::{FromRequest, RequestParts};
+
 use tokio::sync::{RwLock, RwLockReadGuard};
 use type_map::concurrent::TypeMap;
 
@@ -42,6 +45,7 @@ impl Service {
     }
 }
 
+#[cfg(feature = "enable-axum")]
 #[async_trait]
 impl<B> FromRequest<B> for Service
 where

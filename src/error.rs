@@ -1,6 +1,5 @@
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::Json;
+#[cfg(feature = "enable-axum")]
+use axum::{http::StatusCode, response::IntoResponse, Json};
 use serde::Serialize;
 use std::fmt;
 
@@ -43,6 +42,7 @@ where
     data: T,
 }
 
+#[cfg(feature = "enable-axum")]
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         let msg = format!("{}", self);
