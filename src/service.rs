@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::Error;
+use crate::{Result, Error, component::ComponentConstructor};
 
 #[cfg(feature = "enable-axum")]
 use axum::extract::{FromRequest, RequestParts};
@@ -16,6 +16,27 @@ pub struct Service {
 #[derive(Clone, Default)]
 struct ServiceInner {
     pub(crate) components: Arc<RwLock<TypeMap>>,
+}
+
+#[derive(Default)]
+pub struct ServiceBuilder {
+    components: Vec<Box<dyn ComponentConstructor>>
+}
+
+impl ServiceBuilder {
+    pub fn provide<T: ComponentConstructor + 'static>(&mut self, cp: T) {
+        self.components.push(Box::new(cp));
+    }
+
+    pub async fn build(&self) -> Result<Service> {
+        let service = Service::default();
+
+        for cp in self.components.iter() {
+            cp.constructor(service.clone()).await?;
+        }
+
+        Ok(service)
+    }
 }
 
 impl Service {
