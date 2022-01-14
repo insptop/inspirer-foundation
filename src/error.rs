@@ -30,6 +30,16 @@ pub enum Error {
     DatabaseError(#[from] sea_orm::DbErr),
     #[error(transparent)]
     InspirerWebApplicationError(#[from] InspirerWebApplicationError),
+    #[error(transparent)]
+    ValidateError(#[from] validator::ValidationErrors),
+    #[error(transparent)]
+    AxumJsonRejection(#[from] axum::extract::rejection::JsonRejection),
+    #[error(transparent)]
+    AxumFormRejection(#[from] axum::extract::rejection::FormRejection),
+    #[error(transparent)]
+    AxumQueryRejection(#[from] axum::extract::rejection::QueryRejection),
+    #[error("System internal error.")]
+    UnknownError,
 }
 
 #[derive(Debug, Serialize)]
@@ -47,14 +57,39 @@ impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         let msg = format!("{}", self);
         let (code, status) = match self {
+            Self::UnknownError => (1, StatusCode::INTERNAL_SERVER_ERROR),
             Self::InspirerWebApplicationError(InspirerWebApplicationError(status, code, _)) => {
                 (code, status)
             }
-            Self::ExtractServiceExtensionFailed => (1, StatusCode::INTERNAL_SERVER_ERROR),
-            Self::GetConfigurationFailedError => (2, StatusCode::INTERNAL_SERVER_ERROR),
-            Self::GetConfigurationComponentFailed => (3, StatusCode::INTERNAL_SERVER_ERROR),
-            Self::ConfigError(_) => (4, StatusCode::INTERNAL_SERVER_ERROR),
-            Self::DatabaseError(_) => (5, StatusCode::INTERNAL_SERVER_ERROR),
+            Self::ExtractServiceExtensionFailed => (2, StatusCode::INTERNAL_SERVER_ERROR),
+            Self::GetConfigurationFailedError => (3, StatusCode::INTERNAL_SERVER_ERROR),
+            Self::GetConfigurationComponentFailed => (4, StatusCode::INTERNAL_SERVER_ERROR),
+            Self::ConfigError(_) => (5, StatusCode::INTERNAL_SERVER_ERROR),
+            Self::DatabaseError(_) => (6, StatusCode::INTERNAL_SERVER_ERROR),
+            Self::AxumFormRejection(_)
+            | Self::AxumJsonRejection(_)
+            | Self::AxumQueryRejection(_) => {
+                return (
+                    StatusCode::BAD_REQUEST,
+                    Json(ErrorMessage {
+                        code: 7,
+                        msg: "请求参数错误".into(),
+                        data: Option::<()>::None,
+                    }),
+                )
+                    .into_response()
+            }
+            Self::ValidateError(err) => {
+                return (
+                    StatusCode::BAD_REQUEST,
+                    Json(ErrorMessage {
+                        code: 8,
+                        msg: "请求参数错误".into(),
+                        data: err.errors(),
+                    }),
+                )
+                    .into_response()
+            }
         };
 
         (
