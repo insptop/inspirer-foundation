@@ -1,13 +1,13 @@
-use sea_orm::{DatabaseConnection, Database};
+use crate::service::Service;
+use crate::{Error, Result};
+use sea_orm::{Database, DatabaseConnection};
 use std::env;
 use std::ops::Deref;
-use crate::{Result, Error};
-use crate::service::Service;
 
 pub use sea_orm::ConnectionTrait;
 
-use super::ComponentConstructor;
 use super::config::{Config, ConfigAdapter};
+use super::ComponentConstructor;
 
 pub async fn create_connection(database_url: &str) -> Result<DatabaseConnection> {
     Database::connect(database_url).await.map_err(Into::into)
@@ -25,9 +25,11 @@ impl ComponentConstructor for DatabaseComponentConstructor {
                 .and_then(|res| Ok(res.or(env::var("DATABASE_URL").ok())))?,
             None => env::var("DATABASE_URL").ok(),
         };
-    
+
         if let Some(database_url) = database_url {
-            service.register_component(create_connection(database_url.as_str()).await?).await;
+            service
+                .register_component(create_connection(database_url.as_str()).await?)
+                .await;
 
             Ok(())
         } else {
@@ -51,8 +53,9 @@ impl DaoService for Service {
 
 pub struct Dao<'a, C: ConnectionTrait<'a>>(pub &'a C);
 
-impl<'a, C> Deref for Dao<'a, C> 
-where C: ConnectionTrait<'a>
+impl<'a, C> Deref for Dao<'a, C>
+where
+    C: ConnectionTrait<'a>,
 {
     type Target = C;
 
