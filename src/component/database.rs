@@ -1,5 +1,6 @@
 use sea_orm::{DatabaseConnection, Database};
 use std::env;
+use std::ops::Deref;
 use crate::{Result, Error};
 use crate::service::Service;
 
@@ -49,3 +50,13 @@ impl DaoService for Service {
 }
 
 pub struct Dao<'a, C: ConnectionTrait<'a>>(pub &'a C);
+
+impl<'a, C> Deref for Dao<'a, C> 
+where C: ConnectionTrait<'a>
+{
+    type Target = C;
+
+    fn deref(&self) -> &Self::Target {
+        self.0
+    }
+}
