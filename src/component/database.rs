@@ -20,7 +20,7 @@ impl ComponentConstructor for DatabaseComponentConstructor {
     async fn constructor(&self, service: Service) -> Result<()> {
         let database_url = match service.try_get_component::<Config>().await {
             Some(config) => config
-                .get::<Option<String>>("database.connection_url")
+                .try_get::<String>("database.connection_url")
                 .await
                 .and_then(|res| Ok(res.or(env::var("DATABASE_URL").ok())))?,
             None => env::var("DATABASE_URL").ok(),
