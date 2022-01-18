@@ -3,7 +3,7 @@ use axum::{http::StatusCode, response::IntoResponse, Json};
 use serde::Serialize;
 use std::fmt;
 
-pub type Result<T, E = Error> = std::result::Result<T, E>;
+pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub struct InspirerWebApplicationError(pub StatusCode, pub u32, pub &'static str);
