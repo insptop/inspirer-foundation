@@ -1,3 +1,5 @@
+//! Inspirer 应用部分的服务层依赖的必要功能组件集成的支持
+
 use std::sync::Arc;
 
 use crate::{Result, Error, component::ComponentConstructor};
@@ -5,7 +7,7 @@ use crate::{Result, Error, component::ComponentConstructor};
 #[cfg(feature = "enable-axum")]
 use axum::extract::{FromRequest, RequestParts};
 
-use tokio::sync::{RwLock, RwLockReadGuard};
+use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard, RwLockMappedWriteGuard};
 use type_map::concurrent::TypeMap;
 
 #[derive(Clone, Default)]
@@ -40,6 +42,7 @@ impl ServiceBuilder {
 }
 
 impl Service {
+    /// 获取组件，如果没有则 panic
     pub async fn component<T: 'static + Clone>(&self) -> T {
         self.try_get_component()
             .await
@@ -50,12 +53,21 @@ impl Service {
         self.inner.components.read().await.get::<T>().cloned()
     }
 
-    pub async fn component_guard<T: 'static>(&self) -> RwLockReadGuard<'_, T> {
+    /// 获取带读锁的组件，用于只读场景
+    pub async fn component_read_guard<T: 'static>(&self) -> RwLockReadGuard<'_, T> {
         RwLockReadGuard::map(self.inner.components.read().await, |inner| {
             inner.get().expect("Component is not found.")
         })
     }
 
+    /// 获取带写锁的组件，用于读写场景
+    pub async fn component_write_guard<T: 'static>(&self) -> RwLockMappedWriteGuard<'_, T> {
+        RwLockWriteGuard::map(self.inner.components.write().await, |inner| {
+            inner.get_mut().expect("Component is not found.")
+        })
+    }
+
+    /// 注册组件
     pub async fn register_component<T>(&self, component: T)
     where
         T: 'static + Clone + Send + Sync,

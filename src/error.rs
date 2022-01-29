@@ -1,20 +1,61 @@
 #[cfg(feature = "enable-axum")]
 use axum::{http::StatusCode, response::IntoResponse, Json};
 use serde::Serialize;
-use std::fmt;
+use std::fmt::{self, Debug, Display};
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
-#[derive(Debug)]
-pub struct InspirerWebApplicationError(pub StatusCode, pub u32, pub &'static str);
+/// 错误消息
+#[derive(Debug, Serialize)]
+pub struct ErrorMessage<S, T = ()>
+where
+    S: Display + Debug,
+    T: Serialize + Debug,
+{
+    #[serde(skip)]
+    pub status: StatusCode,
+    pub code: u32,
+    pub msg: S,
+    pub data: T,
+}
 
-impl std::error::Error for InspirerWebApplicationError {}
+/// 错误消息模板
+pub type ErrorMessageTemplate = ErrorMessage<&'static str, ()>;
 
-impl fmt::Display for InspirerWebApplicationError {
+impl<S, T> std::error::Error for ErrorMessage<S, T>
+where
+    S: Serialize + Display + Debug,
+    T: Serialize + Debug,
+{
+}
+
+impl<S, T> fmt::Display for ErrorMessage<S, T>
+where
+    S: Serialize + Display + Debug,
+    T: Serialize + Debug,
+{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Error({}): {}", self.1, self.2)
+        write!(f, "{}", self.msg)
     }
 }
+
+impl<S, T> IntoResponse for ErrorMessage<S, T>
+where
+    S: Serialize + Display + Debug,
+    T: Serialize + Debug,
+{
+    fn into_response(self) -> axum::response::Response {
+        (self.status, Json(self)).into_response()
+    }
+}
+
+macro_rules! define_inspirer_error {
+    ($name:ident, $status:expr, $code:literal, $msg:literal) => {
+        pub const $name: $crate::ErrorMessageTemplate = ErrorMessageTemplate { status: $status, code: $code, msg: $msg, data: () };
+    };
+}
+
+define_inspirer_error!(UNKONWN_ERROR, StatusCode::INTERNAL_SERVER_ERROR, 1, "System internal error.");
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -29,7 +70,7 @@ pub enum Error {
     #[error(transparent)]
     DatabaseError(#[from] sea_orm::DbErr),
     #[error(transparent)]
-    InspirerWebApplicationError(#[from] InspirerWebApplicationError),
+    InspirerWebApplicationErrorMessage(#[from] ErrorMessageTemplate),
     #[error(transparent)]
     ValidateError(#[from] validator::ValidationErrors),
     #[error(transparent)]
@@ -42,25 +83,11 @@ pub enum Error {
     UnknownError,
 }
 
-#[derive(Debug, Serialize)]
-struct ErrorMessage<T = ()>
-where
-    T: Serialize,
-{
-    code: u32,
-    msg: String,
-    data: T,
-}
-
 #[cfg(feature = "enable-axum")]
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
-        let msg = format!("{}", self);
         let (code, status) = match self {
             Self::UnknownError => (1, StatusCode::INTERNAL_SERVER_ERROR),
-            Self::InspirerWebApplicationError(InspirerWebApplicationError(status, code, _)) => {
-                (code, status)
-            }
             Self::ExtractServiceExtensionFailed => (2, StatusCode::INTERNAL_SERVER_ERROR),
             Self::GetConfigurationFailedError => (3, StatusCode::INTERNAL_SERVER_ERROR),
             Self::GetConfigurationComponentFailed => (4, StatusCode::INTERNAL_SERVER_ERROR),
@@ -69,37 +96,32 @@ impl IntoResponse for Error {
             Self::AxumFormRejection(_)
             | Self::AxumJsonRejection(_)
             | Self::AxumQueryRejection(_) => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    Json(ErrorMessage {
-                        code: 7,
-                        msg: "请求参数错误".into(),
-                        data: Option::<()>::None,
-                    }),
-                )
-                    .into_response()
+                return ErrorMessage {
+                    code: 7,
+                    msg: "请求参数解析错误",
+                    data: Option::<()>::None,
+                    status: StatusCode::BAD_REQUEST,
+                }
+                .into_response();
             }
             Self::ValidateError(err) => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    Json(ErrorMessage {
-                        code: 8,
-                        msg: "请求参数错误".into(),
-                        data: err.errors(),
-                    }),
-                )
-                    .into_response()
+                return ErrorMessage {
+                    code: 8,
+                    msg: "请求参数错误",
+                    data: err.errors(),
+                    status: StatusCode::BAD_REQUEST,
+                }
+                .into_response();
             }
+            Self::InspirerWebApplicationErrorMessage(msg) => return msg.into_response(),
         };
 
-        (
+        ErrorMessage {
             status,
-            Json(ErrorMessage {
-                code,
-                msg,
-                data: Option::<()>::None,
-            }),
-        )
-            .into_response()
+            code,
+            msg: format!("{}", self),
+            data: Option::<()>::None,
+        }
+        .into_response()
     }
 }

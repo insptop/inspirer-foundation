@@ -83,11 +83,11 @@ impl ConfigAdapter for Config {
 #[async_trait]
 impl ConfigAdapter for Service {
     async fn get<'de, T: Deserialize<'de>>(&self, key: &str) -> Result<T> {
-        self.component_guard::<Config>().await.get::<T>(key).await
+        self.component_read_guard::<Config>().await.get::<T>(key).await
     }
 
     async fn try_get<'de, T: Deserialize<'de>>(&self, key: &str) -> Result<Option<T>> {
-        self.component_guard::<Config>().await.try_get::<T>(key).await
+        self.component_read_guard::<Config>().await.try_get::<T>(key).await
     }
 
     async fn merge<T>(&self, source: T) -> Result<()>
@@ -95,13 +95,13 @@ impl ConfigAdapter for Service {
         T: 'static,
         T: Source + Send + Sync,
     {
-        self.component_guard::<Config>().await.merge(source).await
+        self.component_read_guard::<Config>().await.merge(source).await
     }
 
     async fn set<T>(&self, key: &str, value: T) -> Result<()>
     where
         T: Into<Value> + Send,
     {
-        self.component_guard::<Config>().await.set(key, value).await
+        self.component_read_guard::<Config>().await.set(key, value).await
     }
 }
