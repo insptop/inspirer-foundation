@@ -22,7 +22,7 @@ impl ComponentConstructor for DatabaseComponentConstructor {
             Some(config) => config
                 .try_get::<String>("database.connection_url")
                 .await
-                .and_then(|res| Ok(res.or(env::var("DATABASE_URL").ok())))?,
+                .map(|res| res.or_else(|| env::var("DATABASE_URL").ok()))?,
             None => env::var("DATABASE_URL").ok(),
         };
 
