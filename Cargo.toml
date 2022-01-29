@@ -1,7 +1,13 @@
 [package]
 edition = "2021"
 name = "inspirer-foundation"
-version = "0.1.0"
+license = "Apache-2.0"
+authors = ["Chongyi <xpz3847878@163.com>"]
+version = "0.2.0"
+description = "用于 Inspirer 的基础组件，提供了整个个人项目的必要基础支持"
+repository = "https://github.com/insptop/inspirer-foundation"
+keywords = ["inspirer"]
+readme = "README.md"
 
 [dependencies]
 async-trait = "0.1.52"
