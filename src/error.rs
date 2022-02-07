@@ -49,6 +49,7 @@ where
     }
 }
 
+#[macro_export]
 macro_rules! define_inspirer_error {
     ($name:ident, $status:expr, $code:literal, $msg:literal) => {
         pub const $name: $crate::ErrorMessageTemplate = ErrorMessageTemplate { status: $status, code: $code, msg: $msg, data: () };
