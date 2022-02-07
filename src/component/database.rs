@@ -51,11 +51,11 @@ impl DaoService for Service {
     }
 }
 
-pub struct Dao<'a, C: ConnectionTrait<'a>>(pub &'a C);
+pub struct Dao<'a, C: ConnectionTrait>(pub &'a C);
 
 impl<'a, C> Deref for Dao<'a, C>
 where
-    C: ConnectionTrait<'a>,
+    C: ConnectionTrait,
 {
     type Target = C;
 
