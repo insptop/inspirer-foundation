@@ -1,26 +1,29 @@
 [package]
-edition = "2021"
-name = "inspirer-foundation"
-license = "Apache-2.0"
 authors = ["Chongyi <xpz3847878@163.com>"]
-version = "0.3.1"
 description = "用于 Inspirer 的基础组件，提供了整个个人项目的必要基础支持"
-repository = "https://github.com/insptop/inspirer-foundation"
+edition = "2021"
 keywords = ["inspirer"]
+license = "Apache-2.0"
+name = "inspirer-foundation"
 readme = "README.md"
+repository = "https://github.com/insptop/inspirer-foundation"
+version = "0.3.1"
 
 [dependencies]
 async-trait = "0.1.52"
-axum = { version = "0.4.5", optional = true }
+axum = {version = "0.4.5", optional = true}
 config = "0.11.0"
+libloading = {version = "0.7.3", optional = true}
 log = "0.4.14"
-sea-orm = { version = "0.6.0", default-features = false, features = ["sqlx-mysql", "runtime-tokio-rustls", "macros"] }
-serde = { version = "1.0.136", features = ["derive"] }
+sea-orm = {version = "0.6.0", default-features = false, features = ["sqlx-mysql", "runtime-tokio-rustls", "macros"]}
+serde = {version = "1.0.136", features = ["derive"]}
 thiserror = "1.0.30"
-tokio = { version = "1.16.1", features = ["sync"] }
+tokio = {version = "1.16.1", features = ["sync"]}
 type-map = "0.5.0"
 validator = "0.14.0"
+hyper = {version = "0.14"}
 
 [features]
 default = ["enable-axum"]
 enable-axum = ["axum"]
+app-ext = ["libloading"]

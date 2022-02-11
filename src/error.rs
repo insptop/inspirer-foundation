@@ -60,6 +60,16 @@ define_inspirer_error!(UNKONWN_ERROR, StatusCode::INTERNAL_SERVER_ERROR, 1, "Sys
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[cfg(feature = "app-ext")]
+    #[error(transparent)]
+    LibraryLoadingError(#[from] libloading::Error),
+    #[cfg(feature = "app-ext")]
+    #[error("Error to load application.")]
+    LoadApplicationError,
+    #[error(transparent)]
+    HyperError(#[from] hyper::Error),
+    #[error("Runtime build error: {0}")]
+    RuntimeBuildError(#[source] std::io::Error),
     #[error("Extract Service extension error.")]
     ExtractServiceExtensionFailed,
     #[error("Get configuration data failed.")]
@@ -115,6 +125,7 @@ impl IntoResponse for Error {
                 .into_response();
             }
             Self::InspirerWebApplicationErrorMessage(msg) => return msg.into_response(),
+            _ => (1, StatusCode::INTERNAL_SERVER_ERROR),
         };
 
         ErrorMessage {
