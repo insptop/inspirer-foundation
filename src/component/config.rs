@@ -1,6 +1,6 @@
 use std::sync::Arc;
-
-use crate::{service::Service, Result};
+use super::ComponentProvider;
+use crate::Result;
 use config::{Config as LocalRepository, ConfigError, Value};
 use serde::Deserialize;
 use tokio::sync::RwLock;
@@ -13,7 +13,7 @@ pub struct ConfigComponentSimpleConstructor;
 
 #[async_trait]
 impl ComponentConstructor for ConfigComponentSimpleConstructor {
-    async fn constructor(&self, service: Service) -> Result<()> {
+    async fn constructor(&self, service: ComponentProvider) -> Result<()> {
         service.register_component(Config::default()).await;
 
         Ok(())
@@ -27,7 +27,7 @@ impl<T> ComponentConstructor for ConfigComponentConstructor<T>
 where
     T: Source + Send + Sync + 'static,
 {
-    async fn constructor(&self, service: Service) -> Result<()> {
+    async fn constructor(&self, service: ComponentProvider) -> Result<()> {
         service
             .register_component(Config::from(
                 LocalRepository::new().with_merged(vec![self.0.clone_into_box()])?,
@@ -110,7 +110,7 @@ impl ConfigAdapter for Config {
 }
 
 #[async_trait]
-impl ConfigAdapter for Service {
+impl ConfigAdapter for ComponentProvider {
     async fn get<'de, T: Deserialize<'de>>(&self, key: &str) -> Result<T> {
         self.component_read_guard::<Config>()
             .await

@@ -1,4 +1,4 @@
-use crate::service::Service;
+use super::ComponentProvider;
 use crate::{Error, Result};
 use sea_orm::{Database, DatabaseConnection};
 use std::env;
@@ -17,7 +17,7 @@ pub struct DatabaseComponentConstructor;
 
 #[async_trait]
 impl ComponentConstructor for DatabaseComponentConstructor {
-    async fn constructor(&self, service: Service) -> Result<()> {
+    async fn constructor(&self, service: ComponentProvider) -> Result<()> {
         let database_url = match service.try_get_component::<Config>().await {
             Some(config) => config
                 .try_get::<String>("database.connection_url")
@@ -45,7 +45,7 @@ pub trait DaoService {
 }
 
 #[async_trait]
-impl DaoService for Service {
+impl DaoService for ComponentProvider {
     async fn database_connection(&self) -> DatabaseConnection {
         self.component::<DatabaseConnection>().await
     }
