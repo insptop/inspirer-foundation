@@ -1,42 +1,10 @@
-use std::sync::Arc;
-use super::ComponentProvider;
 use crate::Result;
-use config::{Config as LocalRepository, ConfigError, Value};
+use config::Config as LocalRepository;
 use serde::Deserialize;
+use std::sync::Arc;
 use tokio::sync::RwLock;
 
-use super::ComponentConstructor;
-
-pub use config::{Source, File, FileSourceFile, FileSourceString, Environment};
-
-pub struct ConfigComponentSimpleConstructor;
-
-#[async_trait]
-impl ComponentConstructor for ConfigComponentSimpleConstructor {
-    async fn constructor(&self, service: ComponentProvider) -> Result<()> {
-        service.register_component(Config::default()).await;
-
-        Ok(())
-    }
-}
-
-pub struct ConfigComponentConstructor<T: Source + Send + Sync>(pub T);
-
-#[async_trait]
-impl<T> ComponentConstructor for ConfigComponentConstructor<T>
-where
-    T: Source + Send + Sync + 'static,
-{
-    async fn constructor(&self, service: ComponentProvider) -> Result<()> {
-        service
-            .register_component(Config::from(
-                LocalRepository::new().with_merged(vec![self.0.clone_into_box()])?,
-            ))
-            .await;
-
-        Ok(())
-    }
-}
+pub use config::{Environment, File, FileSourceFile, FileSourceString, Source, ConfigError, Value};
 
 #[derive(Debug, Clone, Default)]
 pub struct Config {
@@ -48,6 +16,12 @@ impl From<LocalRepository> for Config {
         Config {
             inner: Arc::new(RwLock::new(config)),
         }
+    }
+}
+
+impl Config {
+    pub fn new<T: 'static + Source + Send + Sync>(source: T) -> Result<Self> {
+        Ok(LocalRepository::new().with_merged(source)?.into())
     }
 }
 
@@ -106,43 +80,5 @@ impl ConfigAdapter for Config {
         }
 
         Ok(())
-    }
-}
-
-#[async_trait]
-impl ConfigAdapter for ComponentProvider {
-    async fn get<'de, T: Deserialize<'de>>(&self, key: &str) -> Result<T> {
-        self.component_read_guard::<Config>()
-            .await
-            .get::<T>(key)
-            .await
-    }
-
-    async fn try_get<'de, T: Deserialize<'de>>(&self, key: &str) -> Result<Option<T>> {
-        self.component_read_guard::<Config>()
-            .await
-            .try_get::<T>(key)
-            .await
-    }
-
-    async fn merge<T>(&self, source: T) -> Result<()>
-    where
-        T: 'static,
-        T: Source + Send + Sync,
-    {
-        self.component_read_guard::<Config>()
-            .await
-            .merge(source)
-            .await
-    }
-
-    async fn set<T>(&self, key: &str, value: T) -> Result<()>
-    where
-        T: Into<Value> + Send,
-    {
-        self.component_read_guard::<Config>()
-            .await
-            .set(key, value)
-            .await
     }
 }

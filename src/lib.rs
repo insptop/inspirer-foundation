@@ -1,3 +1,5 @@
+//! Inspirer 用于构建项目的基础库
+
 #[macro_use]
 extern crate async_trait;
 

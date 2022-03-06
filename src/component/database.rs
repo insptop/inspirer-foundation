@@ -1,65 +1,43 @@
-use super::ComponentProvider;
 use crate::{Error, Result};
-use sea_orm::{Database, DatabaseConnection};
+use sea_orm::{Database, DatabaseConnection, DbBackend, Statement, ExecResult, DbErr, QueryResult, DatabaseTransaction};
 use std::env;
 use std::ops::Deref;
 
 pub use sea_orm::ConnectionTrait;
 
-use super::config::{Config, ConfigAdapter};
-use super::ComponentConstructor;
-
-pub async fn create_connection(database_url: &str) -> Result<DatabaseConnection> {
-    Database::connect(database_url).await.map_err(Into::into)
-}
-
-pub struct DatabaseComponentConstructor;
-
-#[async_trait]
-impl ComponentConstructor for DatabaseComponentConstructor {
-    async fn constructor(&self, service: ComponentProvider) -> Result<()> {
-        let database_url = match service.try_get_component::<Config>().await {
-            Some(config) => config
-                .try_get::<String>("database.connection_url")
-                .await
-                .map(|res| res.or_else(|| env::var("DATABASE_URL").ok()))?,
-            None => env::var("DATABASE_URL").ok(),
-        };
-
-        if let Some(database_url) = database_url {
-            service
-                .register_component(create_connection(database_url.as_str()).await?)
-                .await;
-
-            Ok(())
-        } else {
-            log::error!("Get connection configuration field failed.");
-            Err(Error::GetConfigurationFailedError)
-        }
-    }
-}
-
-#[async_trait]
-pub trait DaoService {
-    async fn database_connection(&self) -> DatabaseConnection;
-}
-
-#[async_trait]
-impl DaoService for ComponentProvider {
-    async fn database_connection(&self) -> DatabaseConnection {
-        self.component::<DatabaseConnection>().await
-    }
-}
-
 pub struct Dao<'a, C: ConnectionTrait>(pub &'a C);
 
-impl<'a, C> Deref for Dao<'a, C>
-where
-    C: ConnectionTrait,
-{
-    type Target = C;
+#[async_trait]
+impl<'a, C: ConnectionTrait> ConnectionTrait for Dao<'a, C> {
+    fn get_database_backend(&self) -> DbBackend {
+        self.0.get_database_backend()
+    }
 
-    fn deref(&self) -> &Self::Target {
-        self.0
+    async fn execute(&self, stmt: Statement) -> Result<ExecResult, DbErr> {
+        self.0.execute(stmt).await
+    }
+
+    async fn query_one(&self, stmt: Statement) -> Result<Option<QueryResult>, DbErr> {
+        self.0.query_one(stmt).await
+    }
+
+    async fn query_all(&self, stmt: Statement) -> Result<Vec<QueryResult>, DbErr> {
+        self.0.query_all(stmt).await
+    }
+}
+
+pub trait DaoProvider<'a, C: ConnectionTrait> {
+    fn dao(&self) -> Dao<'a, C>;
+}
+
+impl<'a> DaoProvider<'a, DatabaseConnection> for &'a DatabaseConnection {
+    fn dao(&self) -> Dao<'a, DatabaseConnection> {
+        Dao(&self)
+    }
+}
+
+impl<'a> DaoProvider<'a, DatabaseTransaction> for &'a DatabaseTransaction {
+    fn dao(&self) -> Dao<'a, DatabaseTransaction> {
+        Dao(&self)
     }
 }

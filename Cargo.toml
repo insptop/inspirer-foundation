@@ -11,7 +11,7 @@ version = "0.3.1"
 
 [dependencies]
 async-trait = "0.1.52"
-axum = {version = "0.4.5", optional = true}
+axum = {version = "0.4.8", optional = true}
 config = "0.11.0"
 libloading = {version = "0.7.3", optional = true}
 log = "0.4.14"
@@ -22,6 +22,7 @@ tokio = {version = "1.16.1", features = ["sync"]}
 type-map = "0.5.0"
 validator = "0.14.0"
 hyper = {version = "0.14"}
+clap = { version = "3.1.5", features = ["derive"] }
 
 [features]
 default = ["enable-axum"]
