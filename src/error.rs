@@ -90,6 +90,8 @@ pub enum Error {
     AxumFormRejection(#[from] axum::extract::rejection::FormRejection),
     #[error(transparent)]
     AxumQueryRejection(#[from] axum::extract::rejection::QueryRejection),
+    #[error("Resource not found.")]
+    ResourceNotFound,
     #[error("System internal error.")]
     UnknownError,
 }
@@ -125,6 +127,7 @@ impl IntoResponse for Error {
                 .into_response();
             }
             Self::InspirerWebApplicationErrorMessage(msg) => return msg.into_response(),
+            Self::ResourceNotFound => (9, StatusCode::NOT_FOUND),
             _ => (1, StatusCode::INTERNAL_SERVER_ERROR),
         };
 
