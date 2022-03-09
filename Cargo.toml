@@ -18,7 +18,7 @@ log = "0.4.14"
 sea-orm = {version = "0.6.0", default-features = false, features = ["sqlx-mysql", "runtime-tokio-rustls", "macros"]}
 serde = {version = "1.0.136", features = ["derive"]}
 thiserror = "1.0.30"
-tokio = {version = "1.16.1", features = ["sync"]}
+tokio = {version = "1.16.1", features = ["sync", "signal"]}
 type-map = "0.5.0"
 validator = "0.14.0"
 hyper = {version = "0.14"}
