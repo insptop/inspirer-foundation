@@ -21,7 +21,7 @@ impl From<LocalRepository> for Config {
 
 impl Config {
     pub fn new<T: 'static + Source + Send + Sync>(source: T) -> Result<Self> {
-        Ok(LocalRepository::new().with_merged(source)?.into())
+        Ok(LocalRepository::default().with_merged(source)?.into())
     }
 }
 

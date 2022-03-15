@@ -69,7 +69,7 @@ pub enum Error {
     #[error(transparent)]
     HyperError(#[from] hyper::Error),
     #[error("Runtime build error: {0}")]
-    RuntimeBuildError(#[source] std::io::Error),
+    RuntimeBuildError(#[from] std::io::Error),
     #[error("Extract Service extension error.")]
     ExtractServiceExtensionFailed,
     #[error("Get configuration data failed.")]

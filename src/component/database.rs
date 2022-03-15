@@ -1,4 +1,4 @@
-use crate::{Error, Result};
+use crate::Result;
 use sea_orm::{Database, DatabaseConnection, DbBackend, Statement, ExecResult, DbErr, QueryResult, DatabaseTransaction};
 use std::env;
 use std::ops::Deref;

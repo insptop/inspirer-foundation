@@ -1,13 +1,22 @@
-use std::net::SocketAddr;
+use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 
-use axum::Router;
-use serde::Deserialize;
-use tokio::signal;
 use crate::Result;
+use axum::Router;
+use serde::{Deserialize, Serialize};
+use tokio::signal;
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 pub struct ServerConfig {
     pub listen: SocketAddr,
+}
+
+impl Default for ServerConfig {
+    fn default() -> Self {
+        ServerConfig {
+            listen: SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8088)),
+        }
+    }
 }
 
 /// 启动服务器
@@ -18,7 +27,6 @@ pub async fn start_server(listen: &SocketAddr, router: Router) -> Result<()> {
         .await
         .map_err(Into::into)
 }
-
 
 async fn shutdown_signal() {
     let ctrl_c = async {
@@ -33,6 +41,8 @@ async fn shutdown_signal() {
             .expect("failed to install signal handler")
             .recv()
             .await;
+
+        log::debug!("Received termiate signal.");
     };
 
     #[cfg(not(unix))]
