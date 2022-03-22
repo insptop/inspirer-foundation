@@ -21,6 +21,7 @@ impl Default for ServerConfig {
 
 /// 启动服务器
 pub async fn start_server(listen: &SocketAddr, router: Router) -> Result<()> {
+    log::info!("Start server.");
     axum::Server::bind(listen)
         .serve(router.into_make_service())
         .with_graceful_shutdown(shutdown_signal())

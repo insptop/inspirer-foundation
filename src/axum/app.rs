@@ -13,8 +13,7 @@ use config::{builder::DefaultState, Config, ConfigBuilder, ConfigError, File};
 use serde::{Deserialize, Serialize};
 use tracing::Level;
 use tracing_appender::rolling::Rotation;
-use tracing_log::LogTracer;
-use tracing_subscriber::fmt::writer::MakeWriterExt;
+use tracing_subscriber::{fmt::writer::MakeWriterExt, EnvFilter};
 
 use super::server::{start_server, ServerConfig};
 
@@ -163,18 +162,16 @@ fn enable_log(config: &AppConfig) -> Result<()> {
             };
             let appender =
                 tracing_appender::rolling::RollingFileAppender::new(rotation, directory, filename);
-            let (non_blocking_appender, _guard) = tracing_appender::non_blocking(appender);
+
+            let filter = EnvFilter::new(&config.log_level);
 
             tracing_subscriber::fmt()
-                .with_writer(
-                    non_blocking_appender.with_min_level(
-                        Level::from_str(config.log_level.as_str())
-                            .expect("Parse log level config field error."),
-                    ),
-                )
-                .finish();
+                .with_ansi(false)
+                .with_env_filter(filter)
+                .with_writer(appender)
+                .init();
 
-            LogTracer::init().expect("Log tracer initialize error");
+            tracing::debug!("test log.");
         }
     }
 
@@ -215,7 +212,7 @@ fn daemonize(config: &AppConfig) -> Result<()> {
 
 use clap::{arg, Command};
 
-pub fn run_standard_cli_app<F, Fut>(name: &str, app: App<F, Fut>) -> Result<()> 
+pub fn run_standard_cli_app<F, Fut>(name: &str, app: App<F, Fut>) -> Result<()>
 where
     F: Fn(Config) -> Fut + Send + Clone + 'static,
     Fut: Future<Output = Result<Router>> + Send,
@@ -230,7 +227,9 @@ where
         .get_matches();
 
     if let Some(start_command) = matches.subcommand_matches("start") {
-        let config: PathBuf = start_command.value_of_t("config").expect("Invalid configuration file path.");
+        let config: PathBuf = start_command
+            .value_of_t("config")
+            .expect("Invalid configuration file path.");
 
         app.config_path(config).run()?;
     }
