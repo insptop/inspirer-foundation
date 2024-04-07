@@ -1,0 +1,18 @@
+[package]
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+name = "inspirer-auth"
+version = "0.1.0"
+
+[[bin]]
+name = "inspirer-auth"
+path = "src/bin/server.rs"
+
+[dependencies]
+async-trait = {workspace = true}
+axum = {workspace = true}
+clap = {workspace = true}
+eyre = {workspace = true}
+inspirer-framework = {path = "../../inspirer-framework"}
+sea-orm = {workspace = true}
