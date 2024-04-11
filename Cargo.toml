@@ -10,6 +10,7 @@ license = "Apache-2.0"
 arc-swap = "1.6.0"
 async-trait = "0.1.79"
 axum = "0.7.5"
+axum-extra = {version = "0.9.3", features = ["typed-header"]}
 chrono = {version = "0.4.35", features = ["serde"]}
 chrono-tz = "0.8.6"
 clap = {version = "4.5.4", features = ["derive"]}
@@ -26,6 +27,7 @@ thiserror = "1.0.31"
 tower = "0.4.13"
 tower-http = {version = "0.5.2", features = ["fs", "add-extension", "cors", "set-header", "compression-full", "trace", "catch-panic", "timeout"]}
 tracing = "0.1.40"
+uuid = {version = "1", features = ["v4", "fast-rng", "macro-diagnostics"]}
 
 [package]
 authors.workspace = true

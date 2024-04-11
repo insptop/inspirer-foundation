@@ -21,10 +21,9 @@ create table if not exists users (
     email varchar(120) default null,
     email_verified boolean not null default false,
     username varchar(120) default null,
-    phone_country_code varchar(5) default null,
     phone_number varchar(60) default null,
     phone_number_verified boolean not null default false,
-    password varchar(120) default null,
+    password varchar(120) not null default '',
     profile json,
     created_at timestamp not null,
     updated_at timestamp not null

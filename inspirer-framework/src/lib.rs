@@ -17,5 +17,6 @@ pub mod preludes {
     pub use crate::app::AppTrait;
     pub use crate::app::Booter;
     pub use crate::app::AppContext;
+    pub use crate::command::{AppCommand, CommandRegister};
     pub use crate::response::{Resp, ResponseMessage, ok};
 }

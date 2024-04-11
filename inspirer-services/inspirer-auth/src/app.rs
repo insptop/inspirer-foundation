@@ -1,8 +1,8 @@
-use axum::{routing::get, Router};
+use axum::{routing::{get, post}, Router};
 use inspirer_framework::{command::CommandRegister, preludes::*};
 use sea_orm::DbConn;
 
-use crate::{command::Test, controller};
+use crate::{command, controller};
 
 #[derive(Clone)]
 pub struct App {
@@ -17,7 +17,7 @@ impl AppTrait for App {
 
     async fn init(booter: Booter) -> Result<Self> {
         Ok(App {
-            database: booter.component().await?
+            database: booter.component().await?,
         })
     }
 
@@ -25,9 +25,10 @@ impl AppTrait for App {
         Router::new()
             .route("/test", get(controller::test))
             .route("/test-err", get(controller::test_err))
+            .route("/login", post(controller::auth::login))
     }
 
     fn commands(register: &mut CommandRegister<Self>) {
-        register.register::<Test>("app:test");
+        register.register::<command::init::InitData>("app:init");
     }
 }

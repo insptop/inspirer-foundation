@@ -14,9 +14,8 @@ pub struct Model {
     pub email: Option<String>,
     #[sea_orm(unique)]
     pub username: Option<String>,
-    pub phone_country_code: Option<String>,
     pub phone_number: Option<String>,
-    pub password: Option<String>,
+    pub password: String,
     pub profile: Option<Json>,
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,

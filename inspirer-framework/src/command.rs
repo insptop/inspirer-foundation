@@ -4,6 +4,9 @@ use clap::{ArgMatches, Command, CommandFactory, FromArgMatches};
 
 use crate::preludes::{AppContext, AppTrait, Result};
 
+pub use dialoguer::Confirm;
+use dialoguer::theme::ColorfulTheme;
+
 #[async_trait::async_trait]
 pub trait AppCommand<T>
 where
@@ -44,4 +47,11 @@ where
         );
         self
     }
+}
+
+pub fn ask<S: Into<String>>(prompt: S) -> Result<bool> {
+    Ok(Confirm::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt)
+        .default(true)
+        .interact()?)
 }

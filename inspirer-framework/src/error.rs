@@ -80,6 +80,9 @@ pub enum Error {
 
     #[error(transparent)]
     Anyhow(#[from] eyre::Report),
+
+    #[error(transparent)]
+    DialoguerError(#[from] dialoguer::Error),
 }
 
 impl Error {
