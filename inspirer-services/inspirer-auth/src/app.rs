@@ -26,7 +26,7 @@ impl AppTrait for App {
         })
     }
 
-    async fn routes() -> axum::Router<AppContext<Self>> {
+    fn routes() -> axum::Router<AppContext<Self>> {
         Router::new()
             .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
             .route("/api/login", post(controller::api::login))

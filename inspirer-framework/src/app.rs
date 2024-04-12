@@ -54,7 +54,7 @@ pub trait AppTrait: Sized + Clone + Send + Sync {
     async fn init(booter: Booter) -> Result<Self>;
 
     /// Register application routes
-    async fn routes() -> axum::Router<AppContext<Self>>;
+    fn routes() -> axum::Router<AppContext<Self>>;
 
     fn commands(_register: &mut CommandRegister<Self>) {}
 }

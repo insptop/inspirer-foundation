@@ -17,7 +17,7 @@ where
 {
     let server_config = context.config.get::<ServerConfig>(config_keys::SERVER)?;
     let listener = tokio::net::TcpListener::bind(server_config.listen).await?;
-    let routes = T::routes().await.with_state(context).into_make_service();
+    let routes = T::routes().with_state(context).into_make_service();
 
     axum::serve(listener, routes)
         .with_graceful_shutdown(shutdown_signal())
