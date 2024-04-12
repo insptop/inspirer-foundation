@@ -2,35 +2,61 @@ use std::time::Duration;
 
 use axum::{extract::State, http::StatusCode, Json};
 use axum_extra::TypedHeader;
-use axum_macros::debug_handler;
 use chrono::Utc;
 use inspirer_framework::{preludes::*, response::ErrorDetail};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 use crate::{
     app::App, entity::users, header::AppId, password::password_verify, token::AccessToken,
 };
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct LoginRequest {
     /// 登录凭据
     credential: LoginCredential,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 #[serde(tag = "type", content = "payload", rename_all = "snake_case")]
 pub enum LoginCredential {
-    Username { username: String, password: String },
-    Email { email: String, password: String },
+    /// 使用用户名作为登录凭据
+    Username {
+        /// 用户名
+        username: String,
+        /// 密码
+        password: String,
+    },
+    /// 使用邮箱作为登录凭据
+    Email {
+        /// 邮箱
+        email: String,
+        /// 密码
+        password: String,
+    },
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct LoginResponse {
+    /// Token 类型
     token_type: &'static str,
+    /// Access Token
     access_token: String,
 }
 
+/// 登录接口
+#[utoipa::path(
+    post,
+    path = "/login",
+    responses(
+        (status = 200, description = "Success", body = LoginResponse)
+    ),
+    request_body = LoginRequest,
+    params(
+        ("x-auth-app-id", Header, description = "待认证的App ID"),
+    )
+)]
 pub async fn login(
     TypedHeader(app_id): TypedHeader<AppId>,
     State(app): State<AppContext<App>>,
@@ -41,7 +67,11 @@ pub async fn login(
 
     let password = match req.credential {
         LoginCredential::Username { username, password } => {
-            tracing::debug!("login use username credential, username = {username}, password = {password}");
+            tracing::debug!(
+                username = username,
+                password = password,
+                "login use username credential"
+            );
             finder = finder.filter(users::Column::Username.eq(username));
             password
         }

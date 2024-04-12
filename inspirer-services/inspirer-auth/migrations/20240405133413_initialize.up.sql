@@ -25,6 +25,7 @@ create table if not exists users (
     phone_number_verified boolean not null default false,
     password varchar(120) not null default '',
     profile json,
+    locale varchar()
     created_at timestamp not null,
     updated_at timestamp not null
 );
@@ -39,6 +40,7 @@ create unique index unique_username on users (username);
 create table if not exists apps (
     id int unsigned not null auto_increment primary key,
     uuid binary(16) not null,
+    secret binary(16) not null,
     domain_uuid binary(16) not null,
     name varchar(100) not null,
     display_name varchar(100) not null,

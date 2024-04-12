@@ -1,5 +1,5 @@
 [workspace]
-members = ["inspirer-framework", ".", "inspirer-services/inspirer-auth"]
+members = ["inspirer-framework", ".", "inspirer-services/inspirer-auth", "crypto-utils"]
 
 [workspace.package]
 authors = ["Chongyi <xpz3847878@163.com>"]
@@ -27,6 +27,14 @@ thiserror = "1.0.31"
 tower = "0.4.13"
 tower-http = {version = "0.5.2", features = ["fs", "add-extension", "cors", "set-header", "compression-full", "trace", "catch-panic", "timeout"]}
 tracing = "0.1.40"
+utoipa = {version = "4.2.0", features = [
+  "axum_extras",
+  "url",
+  "chrono",
+  "uuid",
+  "time",
+]}
+utoipa-swagger-ui = {version = "6.0.0", features = ["axum"]}
 uuid = {version = "1", features = ["v4", "fast-rng", "macro-diagnostics"]}
 
 [package]
