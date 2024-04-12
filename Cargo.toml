@@ -16,6 +16,7 @@ chrono-tz = "0.8.6"
 clap = {version = "4.5.4", features = ["derive"]}
 eyre = "0.6.12"
 once_cell = "1.19.0"
+rand = {version = "0.8.5"}
 regex = "1.10.3"
 sea-orm = {version = "1.0.0-rc.3", features = [
   "sqlx-mysql",
@@ -27,6 +28,7 @@ thiserror = "1.0.31"
 tower = "0.4.13"
 tower-http = {version = "0.5.2", features = ["fs", "add-extension", "cors", "set-header", "compression-full", "trace", "catch-panic", "timeout"]}
 tracing = "0.1.40"
+url = {version = "2", features = ["serde"]}
 utoipa = {version = "4.2.0", features = [
   "axum_extras",
   "url",

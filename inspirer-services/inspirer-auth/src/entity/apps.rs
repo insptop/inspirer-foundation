@@ -2,6 +2,8 @@
 
 use sea_orm::entity::prelude::*;
 
+use crate::service::app::AppSetting;
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "apps")]
 pub struct Model {
@@ -13,7 +15,9 @@ pub struct Model {
     #[sea_orm(unique)]
     pub name: String,
     pub display_name: String,
-    pub profile: Option<Json>,
+    pub secret: Vec<u8>,
+    pub profile: Json,
+    pub setting: AppSetting,
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,
 }

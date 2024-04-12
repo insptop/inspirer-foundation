@@ -21,3 +21,16 @@ impl AccessToken {
         .unwrap()
     }
 }
+
+pub trait GetToken: Serialize {
+    fn get_token(&self) -> String {
+
+        // EncodingKey::from_ec_pem(key)
+        encode(
+            &Header::default(),
+            &self,
+            &EncodingKey::from_secret(b"secret"),
+        )
+        .unwrap()
+    }
+}

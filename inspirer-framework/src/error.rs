@@ -83,6 +83,9 @@ pub enum Error {
 
     #[error(transparent)]
     DialoguerError(#[from] dialoguer::Error),
+
+    #[error("internal server error")]
+    CryptoError(#[from] crypto_utils::error::Error),
 }
 
 impl Error {

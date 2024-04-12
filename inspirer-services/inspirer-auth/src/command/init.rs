@@ -1,5 +1,8 @@
 use crate::entity::{apps, domains, users};
 use crate::password::password_hash;
+use crate::service::app::AppSetting;
+use crate::service::init::Init as InitService;
+use crate::service::ServiceInterface;
 use chrono::Utc;
 use clap::Parser;
 use inspirer_framework::command::ask;
@@ -43,54 +46,20 @@ impl AppCommand<App> for InitData {
 
         println!("Ready to init data.");
 
+        let service = context.service::<InitService>();
+
         // init domain
-        println!("Initialize domain data.");
-        let domain_uuid = Uuid::new_v4();
-        domains::Entity::insert(domains::ActiveModel {
-            uuid: Set(domain_uuid),
-            name: Set("inspirer-auth".into()),
-            display_name: Set("InspirerAuthService".into()),
-            profile: Set(Some(json!("{}"))),
-            created_at: Set(Utc::now()),
-            updated_at: Set(Utc::now()),
-            ..Default::default()
-        })
-        .exec(&context.database)
-        .await?;
+        let domain_uuid = service.init_domain().await?;
 
         // init apps
-        println!("Initialize app data.");
-        let app_uuid = Uuid::new_v4();
-        apps::Entity::insert(apps::ActiveModel {
-            uuid: Set(app_uuid),
-            domain_uuid: Set(domain_uuid),
-            name: Set("inspirer-auth".into()),
-            display_name: Set("InspirerAuthService".into()),
-            profile: Set(Some(json!("{}"))),
-            created_at: Set(Utc::now()),
-            updated_at: Set(Utc::now()),
-            ..Default::default()
-        })
-        .exec(&context.database)
-        .await?;
+        let app_uuid = service.init_app(domain_uuid).await?;
 
         // init users
-        println!("Initialize user data.");
-        users::Entity::insert(users::ActiveModel {
-            uuid: Set(Uuid::new_v4()),
-            domain_uuid: Set(domain_uuid),
-            username: Set(Some("inspirer-auth".into())),
-            password: Set(password_hash("inspirer-auth")?),
-            profile: Set(Some(json!("{}"))),
-            created_at: Set(Utc::now()),
-            updated_at: Set(Utc::now()),
-            ..Default::default()
-        })
-        .exec(&context.database)
-        .await?;
+        let user_uuid = service.init_user(domain_uuid).await?;
 
         println!("Default Domain UUID = {}", domain_uuid);
         println!("Default App UUID = {}", app_uuid);
+        println!("Default User UUID = {}", user_uuid);
         println!("Done!");
 
         Ok(())

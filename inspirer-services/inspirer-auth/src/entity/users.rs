@@ -16,7 +16,7 @@ pub struct Model {
     pub username: Option<String>,
     pub phone_number: Option<String>,
     pub password: String,
-    pub profile: Option<Json>,
+    pub profile: Json,
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,
 }

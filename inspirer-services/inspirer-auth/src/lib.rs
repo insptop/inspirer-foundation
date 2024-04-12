@@ -1,8 +1,10 @@
 pub mod app;
 pub mod auth;
 pub mod command;
+pub mod config;
 pub mod controller;
 pub mod entity;
 pub mod header;
 pub mod password;
+pub mod service;
 pub mod token;
