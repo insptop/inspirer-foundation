@@ -2,10 +2,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use inspirer_framework::{
-    command::CommandRegister,
-    preludes::*,
-};
+use inspirer_framework::{command::CommandRegister, preludes::*};
 use sea_orm::DbConn;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -32,9 +29,11 @@ impl AppTrait for App {
     async fn routes() -> axum::Router<AppContext<Self>> {
         Router::new()
             .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
-            .route("/test", get(controller::test))
-            .route("/test-err", get(controller::test_err))
-            .route("/login", post(controller::auth::login))
+            .route("/api/login", post(controller::api::login))
+            .route(
+                "/app/:appid/oidc/.well-known/openid-configuration",
+                get(controller::oidc::openid_configuration),
+            )
     }
 
     fn commands(register: &mut CommandRegister<Self>) {
@@ -44,11 +43,11 @@ impl AppTrait for App {
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(crate::controller::auth::login),
+    paths(crate::controller::api::login),
     components(schemas(
-        crate::controller::auth::LoginRequest,
-        crate::controller::auth::LoginCredential,
-        crate::controller::auth::LoginResponse
+        crate::controller::api::LoginRequest,
+        crate::controller::api::LoginCredential,
+        crate::controller::api::LoginResponse
     ))
 )]
 pub struct ApiDoc;

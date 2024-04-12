@@ -1,8 +1,7 @@
 use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
-use url::Url;
 
-use self::app_setting::OIDCSetting;
+use self::app_setting::{BaseSetting, OIDCSetting};
 
 use super::Service;
 
@@ -10,12 +9,16 @@ pub struct App;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, FromJsonQueryResult, PartialEq, Eq)]
 pub struct AppSetting {
+    pub base_setting: BaseSetting,
     pub oidc_setting: OIDCSetting,
 }
 
 pub mod app_setting {
+    use std::str::FromStr;
+
     use sea_orm::FromJsonQueryResult;
     use serde::{Deserialize, Serialize};
+    use url::Url;
 
     #[derive(Debug, Clone, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]
     pub struct OIDCSetting {
@@ -33,6 +36,19 @@ pub mod app_setting {
                 id_token_expire_in: 604800,
                 refresh_token_expire_in: 1209600,
                 authorize_code_expire_in: 600,
+            }
+        }
+    }
+
+    #[derive(Debug, Clone, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]
+    pub struct BaseSetting {
+        pub endpoint: Url,
+    }
+
+    impl Default for BaseSetting {
+        fn default() -> Self {
+            BaseSetting {
+                endpoint: Url::from_str("http://localhost:3000").unwrap(),
             }
         }
     }

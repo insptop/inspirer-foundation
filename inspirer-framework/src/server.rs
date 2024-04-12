@@ -1,11 +1,8 @@
-use std::env::current_dir;
-
-use daemonize::Daemonize;
 use serde::Deserialize;
-use tokio::{runtime::Runtime, signal};
+use tokio::signal;
 
 use crate::{
-    app::{AppContext, AppTrait, Booter},
+    app::{AppContext, AppTrait},
     config::config_keys,
 };
 

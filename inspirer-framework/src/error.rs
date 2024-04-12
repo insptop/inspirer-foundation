@@ -86,6 +86,9 @@ pub enum Error {
 
     #[error("internal server error")]
     CryptoError(#[from] crypto_utils::error::Error),
+
+    #[error(transparent)]
+    UrlError(#[from] url::ParseError),
 }
 
 impl Error {
