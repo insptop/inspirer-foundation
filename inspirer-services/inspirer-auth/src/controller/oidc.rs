@@ -1,6 +1,7 @@
 use axum::{
     extract::{Path, State},
-    Json,
+    routing::get,
+    Json, Router,
 };
 use inspirer_framework::preludes::*;
 use openidconnect::{
@@ -84,3 +85,10 @@ pub struct AuthRequest {
 }
 
 pub async fn auth() {}
+
+pub fn routes() -> Router<AppContext<App>> {
+    Router::new().route(
+        "/app/:appid/oidc/.well-known/openid-configuration",
+        get(openid_configuration),
+    )
+}

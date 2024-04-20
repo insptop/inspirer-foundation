@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{extract::State, http::StatusCode, routing::post, Json, Router};
 use axum_extra::TypedHeader;
 use chrono::Utc;
 use inspirer_framework::{preludes::*, response::ErrorDetail};
@@ -104,4 +104,8 @@ pub async fn login(
         token_type: "Bearer",
         access_token: claims.token(),
     })
+}
+
+pub fn routes() -> Router<AppContext<App>> {
+    Router::new().route("/api/login", post(login))
 }

@@ -2,7 +2,7 @@
 
 use sea_orm::entity::prelude::*;
 
-use crate::service::app::AppSetting;
+use crate::auth::application::AppSetting;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "apps")]

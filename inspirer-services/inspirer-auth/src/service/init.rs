@@ -1,8 +1,8 @@
 use crate::{
+    auth::application::AppSetting,
     config::AppConfig,
     entity::{apps, domains, users},
     password::password_hash,
-    service::app::AppSetting,
 };
 
 use super::Service;

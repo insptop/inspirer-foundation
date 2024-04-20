@@ -29,11 +29,8 @@ impl AppTrait for App {
     fn routes() -> axum::Router<AppContext<Self>> {
         Router::new()
             .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
-            .route("/api/login", post(controller::api::login))
-            .route(
-                "/app/:appid/oidc/.well-known/openid-configuration",
-                get(controller::oidc::openid_configuration),
-            )
+            .merge(controller::api::routes())
+            .merge(controller::oidc::routes())
     }
 
     fn commands(register: &mut CommandRegister<Self>) {
