@@ -1,7 +1,3 @@
-use axum::{
-    routing::{get, post},
-    Router,
-};
 use inspirer_framework::{command::CommandRegister, preludes::*};
 use sea_orm::DbConn;
 use utoipa::OpenApi;
@@ -26,11 +22,12 @@ impl AppTrait for App {
         })
     }
 
-    fn routes() -> axum::Router<AppContext<Self>> {
+    fn routes() -> Router<Self> {
         Router::new()
             .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
             .merge(controller::api::routes())
             .merge(controller::oidc::routes())
+            .merge(controller::auth::routes())
     }
 
     fn commands(register: &mut CommandRegister<Self>) {

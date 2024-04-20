@@ -1,9 +1,8 @@
 use std::time::Duration;
 
-use axum::{extract::State, http::StatusCode, routing::post, Json, Router};
 use axum_extra::TypedHeader;
 use chrono::Utc;
-use inspirer_framework::{preludes::*, response::ErrorDetail};
+use inspirer_framework::{extract::State, preludes::*, response::ErrorDetail, routing::post};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -106,6 +105,6 @@ pub async fn login(
     })
 }
 
-pub fn routes() -> Router<AppContext<App>> {
+pub fn routes() -> Router<App> {
     Router::new().route("/api/login", post(login))
 }

@@ -1,9 +1,8 @@
-use axum::{
+use inspirer_framework::{
     extract::{Path, State},
+    preludes::*,
     routing::get,
-    Json, Router,
 };
-use inspirer_framework::preludes::*;
 use openidconnect::{
     core::{
         CoreClaimName, CoreJwsSigningAlgorithm, CoreProviderMetadata, CoreResponseType,
@@ -86,7 +85,7 @@ pub struct AuthRequest {
 
 pub async fn auth() {}
 
-pub fn routes() -> Router<AppContext<App>> {
+pub fn routes() -> Router<App> {
     Router::new().route(
         "/app/:appid/oidc/.well-known/openid-configuration",
         get(openid_configuration),

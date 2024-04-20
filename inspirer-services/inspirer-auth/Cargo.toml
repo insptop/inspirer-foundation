@@ -12,9 +12,7 @@ path = "src/bin/server.rs"
 [dependencies]
 argon2 = {version = "0.5.3", features = ["std"]}
 async-trait = {workspace = true}
-axum = {workspace = true}
 axum-extra = {workspace = true}
-axum-macros = "0.4.1"
 chrono = {workspace = true}
 clap = {workspace = true}
 crypto-utils = {path = "../../crypto-utils"}
