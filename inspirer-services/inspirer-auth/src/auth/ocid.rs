@@ -11,6 +11,7 @@
 use openidconnect::core::{CoreAuthPrompt, CoreResponseMode, CoreResponseType};
 use serde::{Deserialize, Serialize};
 use url::Url;
+use utoipa::ToSchema;
 
 /// Authentication Request
 ///
@@ -24,7 +25,7 @@ use url::Url;
 /// > If using the HTTP GET method, the request parameters are serialized using URI Query String Serialization,
 /// > per Section 13.1. If using the HTTP POST method,
 /// > the request parameters are serialized using Form Serialization, per Section 13.2.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct AuthenticationRequest {
     /// REQUIRED. OpenID Connect requests MUST contain the openid scope value.
     /// If the openid scope value is not present, the behavior is entirely unspecified.

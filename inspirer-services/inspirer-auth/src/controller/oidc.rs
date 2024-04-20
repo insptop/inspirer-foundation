@@ -1,7 +1,11 @@
+use std::str::FromStr;
+
 use inspirer_framework::{
-    extract::{Path, State},
+    axum::response::IntoResponse,
+    extract::{Path, Query, State},
+    http::{header::LOCATION, HeaderValue},
     preludes::*,
-    routing::get,
+    routing::{get, on, MethodFilter},
 };
 use openidconnect::{
     core::{
@@ -16,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 use uuid::Uuid;
 
-use crate::{app::App, entity::apps};
+use crate::{app::App, auth::ocid::AuthenticationRequest, config::AppConfig, entity::apps};
 
 pub async fn openid_configuration(
     Path((app_id,)): Path<(Uuid,)>,
@@ -73,21 +77,40 @@ pub async fn openid_configuration(
     Ok(Json(meta))
 }
 
-#[derive(Debug, Deserialize)]
-pub struct AuthRequest {
-    client_id: Uuid,
-    response_type: String,
-    scope: String,
-    redirect_uri: Url,
-    state: Option<String>,
-    response_mode: Option<String>,
+pub async fn auth(
+    State(app): State<AppContext<App>>,
+    Query(params): Query<AuthenticationRequest>,
+) -> Result<impl IntoResponse> {
+    let config = app.config.get::<AppConfig>("app")?;
+
+    let mut location = config.app_endpoint.join("login")?;
+
+    // TODO not finished
+
+    let uuid = Uuid::from_str(&params.client_id)
+        .map_err(|_| Error::BadRequest("Invalid client id".to_string()))?;
+
+    location
+        .query_pairs_mut()
+        .append_pair("app_id", &uuid.to_string());
+
+    Ok((
+        StatusCode::FOUND,
+        [(
+            LOCATION,
+            HeaderValue::try_from(location.to_string()).expect("URI isn't a valid header value"),
+        )],
+    ))
 }
 
-pub async fn auth() {}
-
 pub fn routes() -> Router<App> {
-    Router::new().route(
-        "/app/:appid/oidc/.well-known/openid-configuration",
-        get(openid_configuration),
-    )
+    Router::new()
+        .route(
+            "/app/:appid/oidc/.well-known/openid-configuration",
+            get(openid_configuration),
+        )
+        .route(
+            "/app/login",
+            on(MethodFilter::GET.or(MethodFilter::POST), auth),
+        )
 }
