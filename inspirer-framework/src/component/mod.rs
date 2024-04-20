@@ -1,3 +1,7 @@
+//! Framework components
+//!
+//! Provide some components use for development with the framework.
+
 use serde::de::DeserializeOwned;
 
 pub mod db;

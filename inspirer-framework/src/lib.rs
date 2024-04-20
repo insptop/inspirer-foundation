@@ -1,3 +1,7 @@
+//! Inspirer framework
+//!
+//! The framework base on [`axum`], and provide more components to simplify development.
+
 pub mod app;
 pub mod cli;
 pub mod command;

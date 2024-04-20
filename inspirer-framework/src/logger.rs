@@ -77,7 +77,7 @@ pub struct LoggerConfig {
     pub override_filter: Option<String>,
 }
 
-pub fn init<T: AppTrait + 'static>(config: LoggerConfig) {
+pub(crate) fn init<T: AppTrait + 'static>(config: LoggerConfig) {
     if !config.enable {
         return;
     }

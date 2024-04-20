@@ -12,7 +12,8 @@ use openidconnect::{
     TokenUrl, UserInfoUrl,
 };
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use url::Url;
 use uuid::Uuid;
 
 use crate::{app::App, entity::apps};
@@ -71,3 +72,15 @@ pub async fn openid_configuration(
 
     Ok(Json(meta))
 }
+
+#[derive(Debug, Deserialize)]
+pub struct AuthRequest {
+    client_id: Uuid,
+    response_type: String,
+    scope: String,
+    redirect_uri: Url,
+    state: Option<String>,
+    response_mode: Option<String>,
+}
+
+pub async fn auth() {}

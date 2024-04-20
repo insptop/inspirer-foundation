@@ -1,16 +1,11 @@
 use crate::entity::{apps, domains, users};
-use crate::password::password_hash;
-use crate::service::app::AppSetting;
 use crate::service::init::Init as InitService;
 use crate::service::ServiceInterface;
-use chrono::Utc;
 use clap::Parser;
 use inspirer_framework::command::ask;
 use inspirer_framework::preludes::*;
 use sea_orm::sea_query::Table;
-use sea_orm::{ConnectionTrait, EntityTrait, Set};
-use serde_json::json;
-use uuid::Uuid;
+use sea_orm::ConnectionTrait;
 
 use crate::app::App;
 

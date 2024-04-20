@@ -1,0 +1,8 @@
+[package]
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+name = "inspirer-service-registry"
+version = "0.1.0"
+
+[dependencies]

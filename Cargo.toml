@@ -1,5 +1,5 @@
 [workspace]
-members = ["inspirer-framework", ".", "inspirer-services/inspirer-auth", "crypto-utils"]
+members = ["inspirer-framework", ".", "inspirer-services/inspirer-auth", "crypto-utils", "inspirer-service-registry"]
 
 [workspace.package]
 authors = ["Chongyi <xpz3847878@163.com>"]

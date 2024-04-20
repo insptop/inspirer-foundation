@@ -1,3 +1,5 @@
+//! About framework response message
+
 use crate::Error;
 use axum::{
     http::StatusCode,
@@ -38,6 +40,7 @@ impl ErrorDetail {
 
 pub type Resp<T> = crate::Result<Json<ResponseMessage<T>>>;
 
+/// Default json response message
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseMessage<T = ()>
 where
@@ -68,6 +71,7 @@ pub fn json_error_response<T: Serialize>(data: T) -> Json<ResponseMessage<T>> {
     })
 }
 
+/// Return a success message use default response message, See [`ResponseMessage`].
 pub fn ok<T: Serialize>(data: T) -> Resp<T> {
     Ok(json_response(data))
 }
