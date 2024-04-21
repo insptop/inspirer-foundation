@@ -7,12 +7,11 @@ edition = "2021"
 license = "Apache-2.0"
 
 [workspace.dependencies]
-arc-swap = "1.6.0"
 async-trait = "0.1.79"
 axum = "0.7.5"
 axum-extra = {version = "0.9.3", features = ["typed-header"]}
 chrono = {version = "0.4.35", features = ["serde"]}
-chrono-tz = "0.8.6"
+chrono-tz = {version = "0.9.0", features = ["serde"]}
 clap = {version = "4.5.4", features = ["derive"]}
 eyre = "0.6.12"
 once_cell = "1.19.0"

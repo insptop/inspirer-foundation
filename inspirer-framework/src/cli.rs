@@ -52,7 +52,10 @@ pub fn run_with_name_opt<T: AppTrait + 'static>(name: Option<&'static str>) -> e
     let environment = resolve_from_env().into();
     let config = name
         .map_or(ConfigLoader::default(), ConfigLoader::with_name)
-        .load_folder_opt(&environment, parsed_cli.config.as_ref().map(|f| f.as_path()))?;
+        .load_folder_opt(
+            &environment,
+            parsed_cli.config.as_ref().map(|f| f.as_path()),
+        )?;
 
     match &subcommands {
         Ok(std_subcommands) => {
@@ -73,7 +76,8 @@ pub fn run_with_name_opt<T: AppTrait + 'static>(name: Option<&'static str>) -> e
                     }
 
                     create_tokio_runtime()?.block_on(async {
-                        start_server::<T>(create_app::<T>(Booter::new(config)).await?).await
+                        start_server::<T>(create_app::<T>(Booter::new(config, environment)).await?)
+                            .await
                     })?;
                 }
             }
@@ -83,7 +87,7 @@ pub fn run_with_name_opt<T: AppTrait + 'static>(name: Option<&'static str>) -> e
                 if let Some((_, builder)) = subcommand_register.commands.remove(cmd) {
                     create_tokio_runtime()?.block_on(async {
                         builder(args)
-                            .execute(create_app::<T>(Booter::new(config)).await?)
+                            .execute(create_app::<T>(Booter::new(config, environment)).await?)
                             .await
                     })?;
                 }

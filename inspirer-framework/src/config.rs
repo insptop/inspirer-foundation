@@ -20,6 +20,7 @@ pub(crate) mod config_keys {
     pub const SERVER: &'static str = "server";
 }
 
+#[derive(Debug, Clone)]
 pub enum Environment {
     Production,
     Development,

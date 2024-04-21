@@ -1,9 +1,20 @@
+use axum_login::tower_sessions::{
+    cookie::time::Duration, Expiry, MemoryStore, SessionManagerLayer, SessionStore,
+};
 use inspirer_framework::{command::CommandRegister, preludes::*};
 use sea_orm::DbConn;
+use tower_sessions_redis_store::{
+    fred::{clients::RedisPool, interfaces::ClientLike, types::RedisConfig},
+    RedisStore,
+};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{command, controller};
+use crate::{
+    command,
+    config::{AppConfig, SessionDriverConfig},
+    controller,
+};
 
 #[derive(Clone)]
 pub struct App {
@@ -22,17 +33,69 @@ impl AppTrait for App {
         })
     }
 
-    fn routes() -> Router<Self> {
-        Router::new()
+    async fn routes(app: AppContext<Self>) -> Result<Router<Self>> {
+        let app_config = app.config.get::<AppConfig>("app")?;
+
+        let router = Router::new()
             .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
+            .merge({
+                let router = controller::auth::routes();
+                match &app_config.session.driver {
+                    SessionDriverConfig::Memory => router.layer(build_session_manage_layer(
+                        &app_config,
+                        MemoryStore::default(),
+                    )),
+                    SessionDriverConfig::Redis {
+                        database_url,
+                        pool_size,
+                    } => {
+                        let pool = RedisPool::new(
+                            RedisConfig::from_url(&database_url).map_err(Error::wrap)?,
+                            None,
+                            None,
+                            None,
+                            *pool_size,
+                        )
+                        .map_err(Error::wrap)?;
+                        let _ = pool.connect();
+                        pool.wait_for_connect().await.map_err(Error::wrap)?;
+                        let session_store = RedisStore::new(pool);
+
+                        router.layer(build_session_manage_layer(&app_config, session_store))
+                    }
+                }
+            })
             .merge(controller::api::routes())
-            .merge(controller::oidc::routes())
-            .merge(controller::auth::routes())
+            .merge(controller::oidc::routes());
+
+        Ok(router)
     }
 
     fn commands(register: &mut CommandRegister<Self>) {
         register.register::<command::init::InitData>("app:init");
     }
+}
+
+fn build_session_manage_layer<T>(config: &AppConfig, store: T) -> SessionManagerLayer<T>
+where
+    T: SessionStore,
+{
+    SessionManagerLayer::new(store)
+        .with_name(
+            config
+                .session
+                .session_name
+                .clone()
+                .unwrap_or("auth_session".into()),
+        )
+        .with_expiry(
+            config
+                .session
+                .session_expiry
+                .clone()
+                .unwrap_or(Expiry::OnInactivity(Duration::hours(24))),
+        )
+        .with_secure(config.session.with_secure.unwrap_or(false))
 }
 
 #[derive(OpenApi)]

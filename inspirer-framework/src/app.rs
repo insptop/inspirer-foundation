@@ -2,15 +2,24 @@ use std::{ops::Deref, sync::Arc};
 
 use tokio::runtime::Runtime;
 
-use crate::{command::CommandRegister, component::ComponentProvider, config::Config, Result};
+use crate::{
+    command::CommandRegister,
+    component::ComponentProvider,
+    config::{Config, Environment},
+    Result,
+};
 
 pub struct Booter {
     config: Config,
+    pub environment: Environment,
 }
 
 impl Booter {
-    pub fn new(config: Config) -> Self {
-        Booter { config }
+    pub fn new(config: Config, environment: Environment) -> Self {
+        Booter {
+            config,
+            environment,
+        }
     }
 
     pub async fn component<T>(&self) -> Result<T>
@@ -31,13 +40,15 @@ impl Booter {
 pub struct AppContext<T> {
     pub app: T,
     pub config: Arc<Config>,
+    pub environment: Arc<Environment>,
 }
 
 impl<T> AppContext<T> {
-    pub fn new(app: T, config: Config) -> Self {
+    pub fn new(app: T, config: Config, environment: Environment) -> Self {
         AppContext {
             app,
             config: Arc::new(config),
+            environment: Arc::new(environment),
         }
     }
 }
@@ -77,7 +88,7 @@ pub trait AppTrait: Sized + Clone + Send + Sync {
     async fn init(booter: Booter) -> Result<Self>;
 
     /// Register application routes
-    fn routes() -> axum::Router<AppContext<Self>>;
+    async fn routes(app: AppContext<Self>) -> Result<axum::Router<AppContext<Self>>>;
 
     /// Register application cli commands
     ///
@@ -127,7 +138,8 @@ pub(crate) async fn create_app<T>(booter: Booter) -> Result<AppContext<T>>
 where
     T: AppTrait + 'static,
 {
+    let environment = booter.environment.clone();
     let config = booter.config.clone();
     let app = T::init(booter).await?;
-    Ok(AppContext::new(app, config))
+    Ok(AppContext::new(app, config, environment))
 }
