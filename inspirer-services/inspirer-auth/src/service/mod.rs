@@ -6,6 +6,7 @@ use crate::app::App;
 
 pub mod app;
 pub mod init;
+pub mod user;
 
 pub struct Service<T> {
     pub(crate) context: AppContext<App>,

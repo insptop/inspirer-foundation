@@ -3,8 +3,8 @@
 
 use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
-use openidconnect::core::CoreGenderClaim;
 pub use openidconnect::StandardClaims;
+use openidconnect::{core::CoreGenderClaim, GenderClaim};
 use phonenumber::PhoneNumber;
 use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
@@ -149,6 +149,8 @@ pub enum Gender {
     Other(String),
 }
 
+impl GenderClaim for Gender {}
+
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct AddressClaim {
     /// Full mailing address, formatted for display or use on a mailing label.
@@ -183,4 +185,24 @@ pub struct AddressClaim {
     /// Country name component.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub country: Option<String>,
+}
+
+/// User credential use for login
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(tag = "type", content = "payload", rename_all = "snake_case")]
+pub enum UserCredential {
+    /// 使用用户名作为登录凭据
+    Username {
+        /// 用户名
+        username: String,
+        /// 密码
+        password: String,
+    },
+    /// 使用邮箱作为登录凭据
+    Email {
+        /// 邮箱
+        email: String,
+        /// 密码
+        password: String,
+    },
 }

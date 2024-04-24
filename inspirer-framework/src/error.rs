@@ -92,10 +92,12 @@ pub enum Error {
 }
 
 impl Error {
+    /// Wrap standard error to [Error]
     pub fn wrap(err: impl std::error::Error + Send + Sync + 'static) -> Self {
         Self::Any(Box::new(err)) //.bt()
     }
 
+    /// Only get message from error
     pub fn msg(err: impl std::error::Error + Send + Sync + 'static) -> Self {
         Self::Message(err.to_string()) //.bt()
     }

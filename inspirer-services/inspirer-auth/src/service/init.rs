@@ -1,5 +1,5 @@
 use crate::{
-    auth::application::AppSetting,
+    auth::{application::AppSetting, user::Gender},
     config::AppConfig,
     entity::{apps, domains, users},
     password::password_hash,
@@ -8,6 +8,7 @@ use crate::{
 use super::Service;
 use chrono::Utc;
 use inspirer_framework::preludes::*;
+use openidconnect::{StandardClaims, SubjectIdentifier};
 use rand::{rngs::OsRng, RngCore};
 use sea_orm::{EntityTrait, Set};
 use serde_json::json;
@@ -72,7 +73,10 @@ impl Service<Init> {
             domain_uuid: Set(domain_uuid),
             username: Set(Some(config.app_name.clone())),
             password: Set(password_hash(config.app_name.clone())?),
-            profile: Set(json!("{}")),
+            profile: Set(serde_json::to_value(
+                StandardClaims::new(SubjectIdentifier::new(user_uuid.to_string()))
+                    .set_gender(Some(Gender::Other("unknown".into()))),
+            )?),
             created_at: Set(Utc::now()),
             updated_at: Set(Utc::now()),
             ..Default::default()
