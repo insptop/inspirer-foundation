@@ -5,6 +5,7 @@ pub mod config;
 pub mod controller;
 pub mod entity;
 pub mod header;
+pub mod helper;
 pub mod password;
 pub mod service;
 pub mod token;

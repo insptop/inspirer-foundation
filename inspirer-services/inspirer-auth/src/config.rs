@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use axum_login::tower_sessions::Expiry;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -9,6 +11,9 @@ pub struct AppConfig {
 
     /// The url is endpoint of the first app (service)
     pub app_endpoint: Url,
+
+    /// The path is the directory of the auth page
+    pub default_auth_page: PathBuf,
 
     /// Auth session config
     pub session: SessionConfig,

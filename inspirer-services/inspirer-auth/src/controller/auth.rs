@@ -15,6 +15,7 @@ use uuid::Uuid;
 use crate::{
     app::App,
     auth::user::UserCredential,
+    config::AppConfig,
     entity::users,
     service::{user::User, ServiceInterface},
 };
@@ -80,10 +81,13 @@ pub async fn login(
     ok(())
 }
 
-pub fn routes() -> Router<App> {
-    let path = current_dir()
-        .unwrap()
-        .join("inspirer-services/inspirer-auth/auth-page/dist");
+pub fn routes(app: &AppContext<App>) -> Router<App> {
+    let config = app
+        .config
+        .get::<AppConfig>("app")
+        .expect("Missing app config");
+
+    let path = current_dir().unwrap().join(config.default_auth_page);
 
     assert!(path.exists());
     assert!(path.join("index.html").exists());

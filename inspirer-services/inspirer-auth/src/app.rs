@@ -39,7 +39,7 @@ impl AppTrait for App {
         let router = Router::new()
             .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
             .merge({
-                let router = controller::auth::routes();
+                let router = controller::auth::routes(&app);
                 match &app_config.session.driver {
                     SessionDriverConfig::Memory => router.layer(build_session_manage_layer(
                         &app_config,
@@ -73,6 +73,7 @@ impl AppTrait for App {
 
     fn commands(register: &mut CommandRegister<Self>) {
         register.register::<command::init::InitData>("app:init");
+        register.register::<command::list::List>("app:list");
     }
 }
 
